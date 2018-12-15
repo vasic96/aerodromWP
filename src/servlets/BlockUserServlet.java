@@ -8,19 +8,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import dao.KorisnikDAO;
 import model.Korisnik;
 
 /**
- * Servlet implementation class LogoutServlet
+ * Servlet implementation class BlockUserServlet
  */
-@WebServlet("/logout")
-public class LogoutServlet extends HttpServlet {
+@WebServlet("/block")
+public class BlockUserServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public LogoutServlet() {
+    public BlockUserServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -31,15 +32,33 @@ public class LogoutServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		HttpSession session = request.getSession();
 		Korisnik korisnik = (Korisnik) session.getAttribute("ulogovanKorisnik");
-		if(korisnik == null) {
-			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-		} else {
+		String user = request.getParameter("user");
+		try {
+			if(korisnik == null) {
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				throw new Exception("Morate biti ulogovani");
+	
+			}
+			if(!korisnik.isAdmin()) {
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+				throw new Exception("Morate biti admin");
+
+			}
 			
-			session.removeAttribute("ulogovanKorisnik");
-			response.setStatus(200);
 			
+			if(!KorisnikDAO.blockUser(user)) {
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				throw new Exception("Korisnik ne postoji");
+
+			} else {
+				response.setStatus(200);
+			}
+			
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
 	}
 
 	/**

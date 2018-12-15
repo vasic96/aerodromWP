@@ -81,5 +81,24 @@ public class LetDAO {
 		return false;
 		
 	}
+	
+	public static boolean izbrisiLet(int id) {
+		Connection connection = ConnectionManager.getConnection();
+		PreparedStatement preparedStatement = null;
+		try {
+			String query = "DELETE FROM let WHERE id = ?";
+			preparedStatement = connection.prepareStatement(query);
+			preparedStatement.setInt(1,id);
+			
+			return preparedStatement.executeUpdate() == 1;
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {preparedStatement.close();} catch (SQLException ex) {ex.printStackTrace();}
+		}
+		
+		return false;
+	}
+	
 
 }
